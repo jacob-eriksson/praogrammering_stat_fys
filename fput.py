@@ -1,23 +1,15 @@
 
 import numpy as np
 
-N = 31
-A = 2*np.eye(N) - np.eye(N, k=-1) - np.eye(N, k=1)
+N = 32
+A = 2*np.eye(N - 1) - np.eye(N - 1, k=-1) - np.eye(N - 1, k=1)
 
+eigvals, eigvecs = np.linalg.eig(A)
+eigvals_sorted = np.sort(eigvals)
 
-print(A)
+n_vals = np.array(list(range(1, N)))
+analytical_eigvals = (2 * np.sin(n_vals * np.pi / (2*N)))**2
 
-eigenvalues, eigenvectors = np.linalg.eig(A)
-
-print("Eigenvalues:")
-print(eigenvalues)
-
-
-print("  ")
-print("  ")
-print("  ")
-print("  ")
-
-
-print("Eigenvectors:")
-print(eigenvectors)
+print(eigvals_sorted)
+print()
+print(analytical_eigvals)
