@@ -1,7 +1,10 @@
 import numpy as np
 
-# Setting N
+# Parameters
 N = 32
+dt = np.sqrt(1/8)
+N_t = 50000
+K = M = 1
 
 # Initialisng A matrix, dimension (N-1)
 A = 2*np.eye(N - 1) - np.eye(N - 1, k=-1) - np.eye(N - 1, k=1)
@@ -18,8 +21,17 @@ eigvals_sorted = np.sort(eigvals)
 eigvecs_sorted = np.sort(eigvecs)
 
 # Task 2 comparison
-print(f"Analytical: {analytical_eigvals}")
-print(f"Numerical: {eigvals_sorted}")
+print(f"Analytical: {analytical_eigvals[:4]}...\n")
+print(f"Numerical: {eigvals_sorted[:4]}...")
 
-# Task 3)
-print(eigvecs_sorted)
+# Defining force function (Task 3)
+def f(u, alpha):
+    n = len(u) - 1
+    F = np.zeros_like(u)
+    F[1] = u[2] - 2*u[1] + alpha*(u[2] - u[1])**2 - alpha*u[1]**2
+    for i in range(2, n-1):
+        F[i] = u[i+1] - 2*u[i] + u[i-1] + alpha*(u[i+1]-u[i])**2 - alpha*(u[i]-u[i-1])**2
+    F[n-1] = -2*u[n-1] + u[n-2] + alpha*u[n-1]**2 - alpha*(u[n-1]-u[n-2])**2
+    return F
+
+# Defining energy function 
