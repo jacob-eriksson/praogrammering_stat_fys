@@ -35,3 +35,11 @@ def f(u, alpha):
     return F
 
 # Defining energy function 
+def e(u, v, eigenvecs, eigenvals):
+
+    # Linear part (H_0)
+    Q = eigenvecs.T @ u
+    P = eigenvecs.T @ v
+    E0 = 0.5 * np.sum(P**2 + eigenvals * Q**2)
+
+    # Non-linear part (H_1)
