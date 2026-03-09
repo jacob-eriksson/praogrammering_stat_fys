@@ -1,94 +1,76 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Fri Mar  6 15:32:21 2026
-
-@author: jacob
-"""
 import numpy as np
+import matplotlib.pyplot as plt
 
 # Parameters
 N = 32
 dt = np.sqrt(1/8)
-N_t = 50000
-K = M = 1
-
-
-
-
+Nt = 50000
+alpha = 0.25
 
 # Initialisng A matrix, dimension (N-1)
 A = 2*np.eye(N - 1) - np.eye(N - 1, k=-1) - np.eye(N - 1, k=1)
 
 # Extracting eigenproperties
-eigvals, eigvecs = np.linalg.eig(A)
+eigvals, eigvecs = np.linalg.eigh(A)
+idx = np.argsort(eigvals)
+eigvals = eigvals[idx]
+eigvecs = eigvecs[:,idx]
+
+omega1 = np.sqrt(eigvals[0])    # For plotting
 
 # Analytical eigenvalues for Task 2
 n_vals = np.array(list(range(1, N)))
 analytical_eigvals = (2 * np.sin(n_vals * np.pi / (2*N)))**2
 
-# Sorting eigenvalues
-eigvals_sorted = np.sort(eigvals)
-eigvecs_sorted = np.sort(eigvecs)
-
 # Task 2 comparison
 print(f"Analytical: {analytical_eigvals[:4]}...\n")
-print(f"Numerical: {eigvals_sorted[:4]}...")
+print(f"Numerical: {eigvals[:4]}...")
 
 # Defining force function (Task 3)
-def get_forces(positions_list, alpha):
-    forces = []
-    forces.append(0)
-    
-    index = 1
-    while index < 32:
-        force = positions_list[index+1] - 2*positions_list[index] + positions_list[index-1] + alpha*(positions_list[index+1]-positions_list[index])**2 - alpha*(positions_list[index]-positions_list[index-1])**2
-        forces.append(force)
-        index += 1
-    
-    forces.append(0)
-    
-    return forces
+def f(u, alpha):
+    n = len(u)
+    F = np.zeros(n)
+    F[0] = u[1] - 2*u[0] + alpha*(u[1] - u[0])**2 - alpha*u[0]**2
+    for i in range(1, n-1):
+        F[i] = u[i+1] - 2*u[i] + u[i-1] + alpha*(u[i+1]-u[i])**2 - alpha*(u[i]-u[i-1])**2
+    F[n-1] = -2*u[n-1] + u[n-2] + alpha*u[n-1]**2 - alpha*(u[n-1]-u[n-2])**2
+    return F
+
 # Defining energy function 
+def e(u, v, eigenvecs, eigenvals):
+    Q = eigenvecs.T @ u
+    P = eigenvecs.T @ v
+    E = 0.5 * (P**2 + eigenvals * Q**2)
+    return E
 
+# Initial conditions
+u = 4*eigvecs[:,0]
+v = np.zeros(N-1)
+F = f(u,alpha)
 
+E1, E2, E3, E4 = [], [], [], []
+time = []
 
-def new_positions(position_list, velocities_list, delta_t, index):
-    #fixa att definiera alpha
-    alpha = 1
-    forces = get_forces(position_list, alpha)
-    new_positions = np.zeros(33)
-    new_velocities = np.zeros(33)
-    
-    new_positions[0] = 0
-    new_velocities[0] = 0
-    index = 0
-    while index < 32:
-        new_positions[index] = position_list[index] + velocities_list[index] * delta_t 
-        new_velocities[index] = velocities[index] + ((forces[index] / 1) * delta_t)
-        index += 1
-        
-    new_positions[32] = 0
-    new_velocities[32] = 0
+for i in range(Nt):
+    u = u + dt*v + 0.5*dt**2*F
+    F_new = f(u,alpha)
+    v = v + 0.5*dt*(F + F_new)
+    F = F_new
 
-    return [new_positions, new_velocities]
+    E = e(u,v,eigvecs,eigvals)
+    E1.append(E[0])
+    E2.append(E[1])
+    E3.append(E[2])
+    E4.append(E[3])
+    time.append(i*dt*omega1/(2*np.pi))
 
+plt.plot(time,100*np.array(E1),label=r"$E_1$")
+plt.plot(time,100*np.array(E2),label=r"$E_2$")
+plt.plot(time,100*np.array(E3),label=r"$E_3$")
+plt.plot(time,100*np.array(E4),label=r"$E_4$")
 
-
-use_vector = eigvecs[0]
-
-index = 0
-positions = [0]
-while index < 32:
-    position = 4 * use_vector[index]
-    positions.append(position)
-    index += 1
-
-positions.append(0)
-velocities = np.zeros(33)   
-
-
-
-
-
-    
+plt.xlabel(r"$\omega_1$t / 2π")
+plt.xlim(0, 160)
+plt.ylabel(r"$E_k$ ($\times10^{-2}$)")
+plt.legend()
+plt.show()
