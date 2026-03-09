@@ -66,6 +66,7 @@ def new_positions(position_list, velocities_list, delta_t, index):
     while index < 32:
         new_positions[index] = position_list[index] + velocities_list[index] * delta_t 
         new_velocities[index] = velocities[index] + ((forces[index] / 1) * delta_t)
+        index += 1
         
     new_positions[32] = 0
     new_velocities[32] = 0
@@ -84,4 +85,10 @@ while index < 32:
     index += 1
 
 positions.append(0)
-velocities = np.zeros(33)  
+velocities = np.zeros(33)   
+
+
+
+
+
+    
