@@ -36,9 +36,9 @@ def e(u, v, eigenvecs, eigenvals):
     # Linear part (H_0)
     Q = eigenvecs.T @ u
     P = eigenvecs.T @ v
-    E_linear = 0.5 * (P**2 + eigenvals * Q**2)
+    E = 0.5 * (P**2 + eigenvals * Q**2)
 
-    return E_linear
+    return E
 
 # Parameters
 dt = np.sqrt(1/8)
@@ -49,3 +49,12 @@ alpha = 0.25
 u = 4*eigvecs[:,0]
 v = np.zeros(N-1)
 F = f(u,alpha)
+
+
+omega1 = np.sqrt(eigvals[0])
+
+for i in range(Nt):
+    u = u + dt*v + 0.5*dt**2*F
+    F_new = f(u,alpha)
+    v = v + 0.5*dt*(F + F_new)
+    F = F_new
