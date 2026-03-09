@@ -2,9 +2,6 @@ import numpy as np
 
 # Parameters
 N = 32
-dt = np.sqrt(1/8)
-N_t = 50000
-K = M = 1
 
 # Initialisng A matrix, dimension (N-1)
 A = 2*np.eye(N - 1) - np.eye(N - 1, k=-1) - np.eye(N - 1, k=1)
@@ -32,3 +29,23 @@ def f(u, alpha):
         F[i] = u[i+1] - 2*u[i] + u[i-1] + alpha*(u[i+1]-u[i])**2 - alpha*(u[i]-u[i-1])**2
     F[n] = -2*u[n] + u[n-1] + alpha*u[n]**2 - alpha*(u[n]-u[n-1])**2
     return F
+
+# Defining energy function 
+def e(u, v, eigenvecs, eigenvals):
+
+    # Linear part (H_0)
+    Q = eigenvecs.T @ u
+    P = eigenvecs.T @ v
+    E_linear = 0.5 * (P**2 + eigenvals * Q**2)
+
+    return E_linear
+
+# Parameters
+dt = np.sqrt(1/8)
+Nt = 50000
+alpha = 0.25
+
+# Initial conditions
+u = 4*eigvecs[:,0]
+v = np.zeros(N-1)
+F = f(u,alpha)
